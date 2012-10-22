@@ -9,3 +9,12 @@ npm install ws
 npm install prototype
 
 This will only run in a web server with WebSockets.
+
+Current status
+==============
+Still in the prototype stage so do not expect the API to be anything close to stable.
+Current features:
+ * WebSocket based streams for node.js (send and receive)
+ * Basic UDP datagram send/receive from node.js
+ * Framework for the browser side but it's not working (need a browser version of node's Buffer)
+
