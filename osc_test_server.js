@@ -13,7 +13,7 @@ wss.on('connection', function(ws) {
          p = new osc.OSCMessage(v);
       }
       console.log(util.inspect(p, false, null));
-      ws.send(new Uint8Array(p.toBuffer()), {binary: true, mask: true});
+      ws.send(new Uint8Array(p.toBuffer()), {binary: true});
       ws.close();
    });
 });

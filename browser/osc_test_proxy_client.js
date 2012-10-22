@@ -16,15 +16,18 @@ bndl.push(bndl2);
 var ws = new WebSocket('ws://localhost:8080');
 
 ws.onmessage = function(message) {
-    var b = new Buffer(message);
-    var sz = b.readUInt32BE(0);
-    var pbuf = new Buffer(sz);
-    b.copy(pbuf, 0, 4, sz);
-    if (osc.OSCBundle.isBundle(pbuf)) {
-        console.log(new osc.OSCBundle(pbuf));
-    } else {
-        console.log(new osc.OSCMessage(pbuf));
+    var rdr = new FileReader();
+    rdr.onloadend = function() {
+       var v = new DataView(rdr.result, 0);
+       if (osc.OSCBundle.isBundle(v)) {
+           console.log(new osc.OSCBundle(v));
+       } else {
+           console.log(new osc.OSCMessage(v));
+       }
     }
+    rdr.readAsArrayBuffer(message.data);
 };
 
-ws.send(bndl.toBuffer().toString('binary'));
+ws.onopen = function() {
+   ws.send(bndl.toBuffer());
+}
