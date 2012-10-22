@@ -6,5 +6,6 @@ josc is licensed under the AGPL v3.0. (see http://opensource.org/licenses/AGPL-3
 
 The node.js portion requires the ws module:
 npm install ws
+npm install prototype
 
 This will only run in a web server with WebSockets.
