@@ -7,21 +7,20 @@ wss.on('connection', function(ws) {
    var oss = new oscserver.UDPServer(4444);
    oss.on("packet", function(pkt) {
        console.log("Received a packet from UDP: ", pkt);
-       ws.send(pkt.toBuffer());
+       ws.send(new Uint8Array(pkt.toBuffer()), {binary: true, mask: true});
    });
    ws.on('message', function(data) {
-       var b = new Buffer(data, "binary");
-       var sz = b.readUInt32BE(0);
-       var pbuf = new Buffer(sz);
-       b.copy(pbuf, 0, 4, sz);
+       if (data.length == 0) return;
+       var b = new Uint8Array(data);
+       var v = new DataView(b.buffer, 0);
        var pkt = null;
-       if (osc.OSCBundle.isBundle(pbuf)) {
-           pkt = new osc.OSCBundle(pbuf);
+       if (osc.OSCBundle.isBundle(v)) {
+           pkt = new osc.OSCBundle(v);
        } else {
-           pkt = new osc.OSCMessage(pbuf);
+           pkt = new osc.OSCMessage(v);
        }
-       console.log("Received a packet from WS: ", pkt);
-       oss.socket.send(pbuf, 0, pbuf.length, 1234, "localhost");
+       console.log("Received a packet from WS: ", util.inspect(pkt, false, null));
+       oss.socket.send(b, 0, b.length, 7000, "localhost");
    });
    oss.start()
 });
