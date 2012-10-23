@@ -2,9 +2,14 @@
 <head>
     <script src="require.js"></script>
     <script src="js_modules/prototype.js"></script>
+    <script src="jquery-1.8.2.js"></script>
+    <script src="jquery-ui-1.9.0.custom.min.js"></script>
+    <link rel="stylesheet" href="css/smoothness/jquery-ui-1.9.0.custom.min.css"/>
+    <link rel="stylesheet" href="css/led.css"/>
 </head>
 <body>
-    <h1>OSC Test Page</h1>
+    <input type="checkbox" id="check"/><label for="check">Toggle LED</label>&nbsp;
+    <div id="led"></div>
     <script src="osc_test_proxy_client.js"></script>
 </body>
 </html>
