@@ -1,33 +1,46 @@
 var osc = require('../lib/osc');
-
-var m = new osc.OSCMessage('/test/1');
-m.push(42);
-m.push(14);
-var m2 = new osc.OSCMessage('/test/2');
-var bndl = new osc.OSCBundle();
-bndl.push(m); bndl.push(m2);
-var bndl2 = new osc.OSCBundle();
-bndl2.push(new osc.OSCMessage('/test/3'));
-bndl2.push(new osc.OSCMessage('/test/4'));
-bndl2.push(new osc.OSCMessage('/test/5'));
-bndl2.timetag = new Date(Date.parse("September 18, 1970"));
-bndl.push(bndl2);
-
-var ws = new WebSocket('ws://localhost:8080');
-
-ws.onmessage = function(message) {
+function parsePacket(data) {
     var rdr = new FileReader();
-    rdr.onloadend = function() {
-       var v = new DataView(rdr.result, 0);
+    rdr.onload = function(evt) {
+       var v = new DataView(evt.target.result, 0);
+       if (evt.target.result.byteLength == 4) {
+          var sz = v.getUint32(0);
+          return;
+       }
        if (osc.OSCBundle.isBundle(v)) {
-           console.log(new osc.OSCBundle(v));
+           alert("Bundle not supported!");
        } else {
-           console.log(new osc.OSCMessage(v));
+           var m = new osc.OSCMessage(v);
+           if (m.address == "/button/1") {
+              if (m.args[0] == 1.0) {
+                 $("#led").css("background-color", "#00dd00");
+              } else {
+                 $("#led").css("background-color", "#dddddd");
+              }
+           } else {
+              alert("Unknown address: " + m.address);
+           }
        }
     }
-    rdr.readAsArrayBuffer(message.data);
+    rdr.readAsArrayBuffer(data);
 };
 
-ws.onopen = function() {
-   ws.send(bndl.toBuffer());
-}
+$(function() {
+   var ws = new WebSocket('ws://localhost:8080');
+   $("#check").button();
+   ws.onopen = function() {
+      $("#check").click(function(evt) {
+         var m = new osc.OSCMessage("/led/1");
+         if (this.checked) m.push(1.0, 'f');
+         else m.push(0.0, 'f');
+         var buf = m.toBuffer();
+         var szbuf = new Uint32Array(1);
+         szbuf[0] = buf.byteLength;
+         ws.send(szbuf, {binary:true});
+         ws.send(new Uint8Array(buf), {binary:true});
+      });
+   };
+   ws.onmessage = function(message) {
+      parsePacket(message.data);
+   };
+});

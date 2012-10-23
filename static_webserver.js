@@ -7,12 +7,12 @@ var path = require('path');
  */
 http.createServer(function(request, response) {
     var filePath = null;
-    if (request.url.indexOf("lib/") != -1) {
-        filePath = ".." + request.url;
-    } else if (request.url == '/') {
-        filePath = "../browser/index.html";
+    if (request.url == '/') {
+        filePath = "browser/index.html";
+    } else if (request.url.match("^/lib/.*$") != null) {
+        filePath = "." + request.url;
     } else {
-        filePath = '../browser' + request.url;
+        filePath = 'browser' + request.url;
     }
     var extname = path.extname(filePath);
     var contentType = 'text/html';
@@ -22,6 +22,9 @@ http.createServer(function(request, response) {
             break;
         case '.css':
             contentType = 'text/css';
+            break;
+        case '.png':
+            contentType = 'image/png';
             break;
     }
     fs.exists(filePath, function(exists) {
